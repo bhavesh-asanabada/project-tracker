@@ -21,16 +21,30 @@ jobs:
 
       - name: Compute next version
         id: version
+        shell: bash
         run: |
-          # Find the latest semver tag (v MAJOR.MINOR.PATCH)
-          LATEST=$(git tag --list 'v*.*.*' --sort=-version:refname | head -n 1)
+          set -euo pipefail
+          git fetch --tags --force
+
+          # Skip tagging if this commit already has a semver tag
+          EXISTING=$(git tag --points-at HEAD --list 'v[0-9]*.[0-9]*.[0-9]*' | head -n 1 || true)
+          if [ -n "$EXISTING" ]; then
+            echo "tag=" >> "$GITHUB_OUTPUT"
+            echo "latest=$EXISTING" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # Find the latest semver tag (vMAJOR.MINOR.PATCH)
+          LATEST=$(git tag --list 'v[0-9]*.[0-9]*.[0-9]*' --sort=-version:refname | head -n 1)
 
           if [ -z "$LATEST" ]; then
             NEXT="v0.1.0"
           else
-            MAJOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f1)
-            MINOR=$(echo "$LATEST" | sed 's/v//' | cut -d. -f2)
-            PATCH=$(echo "$LATEST" | sed 's/v//' | cut -d. -f3)
+            VERSION="${LATEST#v}"
+            MAJOR="${VERSION%%.*}"
+            REST="${VERSION#*.}"
+            MINOR="${REST%%.*}"
+            PATCH="${REST#*.}"
             NEXT="v${MAJOR}.${MINOR}.$((PATCH + 1))"
           fi
 
@@ -38,6 +52,7 @@ jobs:
           echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
 
       - name: Create and push tag
+        if: ${{ steps.version.outputs.tag != '' }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
