@@ -2,6 +2,10 @@ server:
   port: 8082
 
 spring:
+  config:
+    import:
+      - classpath:sprint-metrics.properties
+      - optional:classpath:jira-cloud.properties
   application:
     name: project-tracker
   datasource:

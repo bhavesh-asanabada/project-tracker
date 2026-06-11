@@ -2,34 +2,32 @@ package com.bhavesh.projectTracker.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import java.time.LocalDate;
 
-import java.util.Date;
-import java.util.List;
-
-@Setter
-@Getter
 @Entity
 @Data
 @Table(name = "jira")
 public class Jira {
 
-  private int id;
-
   @Id
-  private Long jiraId;
+  private String jiraId;
+
   private String jiraKey;
+  private String sprintName;
+  private String ticketType;
+  private String status;
 
-  private Date createdOn;
-  private Date readyForReviewOn;
-  private Date doneOn;
+  private LocalDate createdOn;
+  private LocalDate readyForReviewOn;
+  private LocalDate doneOn;
+  private LocalDate sprintStartOn;
+  private LocalDate sprintEndOn;
 
-  @OneToMany(cascade = CascadeType.ALL)
-  @JoinColumn(name = "assignee")
-  private List<User> assignees;
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "assignee_user_id")
+  private User assignee;
 
-  @OneToOne(cascade = CascadeType.ALL)
-  @JoinColumn(name = "reporter")
+  @ManyToOne(fetch = FetchType.LAZY)
+  @JoinColumn(name = "reporter_user_id")
   private User reporter;
 }

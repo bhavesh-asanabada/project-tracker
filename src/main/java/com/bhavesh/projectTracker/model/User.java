@@ -2,13 +2,7 @@ package com.bhavesh.projectTracker.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 
-import java.util.List;
-
-@Setter
-@Getter
 @Entity
 @Data
 @Table(name = "users")
@@ -30,7 +24,4 @@ public class User {
   private String email;
 
   private String organization;
-
-  @ManyToOne(cascade = CascadeType.ALL)
-  private Jira jira;
 }
